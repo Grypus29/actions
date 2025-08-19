@@ -1,0 +1,55 @@
+name: build_container
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      origin_repo:
+        required: true
+        type: string
+      login:
+        required: true
+        type: string
+      trigger_cd:
+        required: false
+        type: boolean
+        default: false
+      trigger_cd_env:
+        required: false
+        type: string
+        default: dev
+    secrets:
+      GHCR_PAT:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ inputs.origin_repo }}
+    steps:
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.origin_repo }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ inputs.login }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build & Push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ inputs.tag }}
+            ${{ env.IMAGE }}:latest
+
+      - name: (noop) CD placeholder
+        if: ${{ inputs.trigger_cd }}
+        run: echo "CD would run for env ${{ inputs.trigger_cd_env }} (placeholder)"
