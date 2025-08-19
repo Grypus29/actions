@@ -1,0 +1,9 @@
+name: bump_js
+on:
+  workflow_call: {}
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "bump_js placeholder"
