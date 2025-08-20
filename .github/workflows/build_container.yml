@@ -26,8 +26,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      IMAGE: ghcr.io/${{ inputs.origin_repo }}
     steps:
       - name: Checkout caller repo
         uses: actions/checkout@v4
@@ -40,6 +38,9 @@ jobs:
           registry: ghcr.io
           username: ${{ inputs.login }}
           password: ${{ secrets.GHCR_PAT }}
+      
+      - name: Normalize image path (lowercase)
+        run: echo "IMAGE=$(echo ghcr.io/${{ inputs.origin_repo }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Build & Push image
         uses: docker/build-push-action@v5
